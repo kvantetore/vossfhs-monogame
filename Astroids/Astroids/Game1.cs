@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System;
 
 namespace Astroids
 {
@@ -15,9 +16,16 @@ namespace Astroids
         Color backgroundColor = Color.CornflowerBlue;
         Texture2D background;
         Texture2D rocket;
+        SpriteFont arial;
 
-        int posX;
-        int posY;
+
+        float rocketAngularVelocity;
+        float rocketAngle;
+
+        Vector2 rocketPosition;
+        Vector2 rocketVelocity;
+
+        float maxSpeed;
 
         public Game1()
         {
@@ -38,9 +46,9 @@ namespace Astroids
             graphics.PreferredBackBufferHeight = 768;
             graphics.ApplyChanges();
 
-            posX = graphics.PreferredBackBufferWidth / 2;
-            posY = graphics.PreferredBackBufferHeight / 2;
-
+            var posX = graphics.PreferredBackBufferWidth / 2;
+            var posY = graphics.PreferredBackBufferHeight / 2;
+            rocketPosition = new Vector2(posX, posY);
 
             base.Initialize();
         }
@@ -57,6 +65,7 @@ namespace Astroids
             // TODO: use this.Content to load your game content here
             background = Content.Load<Texture2D>("stars");
             rocket = Content.Load<Texture2D>("rocket_128");
+            arial = Content.Load<SpriteFont>("arial");
         }
 
         /// <summary>
@@ -79,6 +88,9 @@ namespace Astroids
                 Exit();
 
             // TODO: Add your update logic here
+            var timeStep = (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+
             var keyboard = Keyboard.GetState();
             if (keyboard.IsKeyDown(Keys.G))
             {
@@ -90,7 +102,33 @@ namespace Astroids
                 backgroundColor = Color.Red;
             }
 
-            posX = posX + 1;
+            if (keyboard.IsKeyDown(Keys.Left))
+            {
+                rocketAngularVelocity -= 10f * timeStep;
+            }
+            if (keyboard.IsKeyDown(Keys.Right))
+            {
+                rocketAngularVelocity += 10f * timeStep;
+            }
+
+            Vector2 forward = new Vector2((float)Math.Sin(rocketAngle), -(float)Math.Cos(rocketAngle));
+            if (keyboard.IsKeyDown(Keys.Up))
+            {
+                rocketVelocity += forward * 100f * timeStep;
+            }
+            if (keyboard.IsKeyDown(Keys.Down))
+            {
+                rocketVelocity -= forward * 100f * timeStep;
+            }
+
+            rocketAngle += rocketAngularVelocity * timeStep;
+            rocketPosition += rocketVelocity * timeStep;
+
+            float speed = (float)Math.Sqrt((rocketVelocity.X * rocketVelocity.X) + (rocketVelocity.Y * rocketVelocity.Y));
+            if (speed > maxSpeed)
+            {
+                maxSpeed = speed;
+            }
 
             base.Update(gameTime);
         }
@@ -109,8 +147,12 @@ namespace Astroids
             var screenHeight = graphics.PreferredBackBufferHeight;
             spriteBatch.Draw(background, new Rectangle(0, 0, screenWidth, screenHeight), Color.White);
 
-            spriteBatch.Draw(rocket, new Rectangle(posX, posY, rocket.Width, rocket.Height), Color.Wheat);
+            Rectangle sourceRect = new Rectangle(0, 0, rocket.Width, rocket.Height);
+            Vector2 center = new Vector2(rocket.Width / 2, rocket.Height / 2);
 
+            spriteBatch.Draw(rocket, rocketPosition, sourceRect, Color.White, rocketAngle, center, 1f, SpriteEffects.None, 0);
+
+            spriteBatch.DrawString(arial, $"Max Speed: {maxSpeed}", new Vector2(0, 0), Color.Green);
 
             spriteBatch.End();
 
