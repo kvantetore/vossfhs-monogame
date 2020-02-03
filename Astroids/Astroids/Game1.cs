@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
+using System.Collections.Generic;
 
 namespace Astroids
 {
@@ -18,7 +19,7 @@ namespace Astroids
         Texture2D rocket;
         SpriteFont arial;
 
-        Bullet currentBullet;
+        List<Bullet> bullets;
 
         float rocketAngularVelocity;
         float rocketAngle;
@@ -34,6 +35,8 @@ namespace Astroids
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
+
+            bullets = new List<Bullet>();
         }
 
         /// <summary>
@@ -126,12 +129,14 @@ namespace Astroids
 
             if (keyboard.IsKeyDown(Keys.Space))
             {
-                currentBullet = new Bullet();
+                Bullet currentBullet = new Bullet(this);
                 currentBullet.Load(Content);
 
                 currentBullet.Angle = rocketAngle;
                 currentBullet.Velocity = forward * 200f;
                 currentBullet.Position = rocketPosition + forward * rocket.Width / 2;
+
+                bullets.Add(currentBullet);
             }
 
             rocketAngle += rocketAngularVelocity * timeStep;
@@ -143,12 +148,17 @@ namespace Astroids
                 maxSpeed = speed;
             }
 
-            if (currentBullet != null)
+            foreach (var bullet in bullets.ToArray())
             {
-                currentBullet.Update(gameTime);
+                bullet.Update(gameTime);
             }
 
             base.Update(gameTime);
+        }
+
+        public void RemoveBullet(Bullet b)
+        {
+            bullets.Remove(b);
         }
 
         /// <summary>
@@ -170,9 +180,9 @@ namespace Astroids
 
             spriteBatch.Draw(rocket, rocketPosition, sourceRect, Color.White, rocketAngle, center, 1f, SpriteEffects.None, 0);
 
-            if (currentBullet != null)
+            foreach (var bullet in bullets)
             {
-                currentBullet.Draw(spriteBatch);
+                bullet.Draw(spriteBatch);
             }
 
             spriteBatch.DrawString(arial, $"Max Speed: {maxSpeed}", new Vector2(0, 0), Color.Green);

@@ -6,12 +6,21 @@ using System;
 
 namespace Astroids
 {
-    class Bullet
+    public class Bullet
     {
+        Game1 game;
+        DateTime Created;
+
         private Texture2D Sprite;
         public Vector2 Position;
         public Vector2 Velocity = new Vector2(0, 0);
         public float Angle;
+
+        public Bullet(Game1 g)
+        {
+            game = g;
+            Created = DateTime.Now;
+        }
 
         public void Load(ContentManager c)
         {
@@ -22,6 +31,11 @@ namespace Astroids
         {
             float timeStep = (float)gameTime.ElapsedGameTime.TotalSeconds;
             Position += Velocity * timeStep;
+
+            if (Created + TimeSpan.FromSeconds(2) < DateTime.Now)
+            {
+                game.RemoveBullet(this);
+            }
         }
 
 
