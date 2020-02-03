@@ -18,12 +18,15 @@ namespace Astroids
         Texture2D rocket;
         SpriteFont arial;
 
+        Bullet currentBullet;
 
         float rocketAngularVelocity;
         float rocketAngle;
 
         Vector2 rocketPosition;
         Vector2 rocketVelocity;
+
+
 
         float maxSpeed;
 
@@ -121,6 +124,16 @@ namespace Astroids
                 rocketVelocity -= forward * 100f * timeStep;
             }
 
+            if (keyboard.IsKeyDown(Keys.Space))
+            {
+                currentBullet = new Bullet();
+                currentBullet.Load(Content);
+
+                currentBullet.Angle = rocketAngle;
+                currentBullet.Velocity = forward * 200f;
+                currentBullet.Position = rocketPosition + forward * rocket.Width / 2;
+            }
+
             rocketAngle += rocketAngularVelocity * timeStep;
             rocketPosition += rocketVelocity * timeStep;
 
@@ -128,6 +141,11 @@ namespace Astroids
             if (speed > maxSpeed)
             {
                 maxSpeed = speed;
+            }
+
+            if (currentBullet != null)
+            {
+                currentBullet.Update(gameTime);
             }
 
             base.Update(gameTime);
@@ -151,6 +169,11 @@ namespace Astroids
             Vector2 center = new Vector2(rocket.Width / 2, rocket.Height / 2);
 
             spriteBatch.Draw(rocket, rocketPosition, sourceRect, Color.White, rocketAngle, center, 1f, SpriteEffects.None, 0);
+
+            if (currentBullet != null)
+            {
+                currentBullet.Draw(spriteBatch);
+            }
 
             spriteBatch.DrawString(arial, $"Max Speed: {maxSpeed}", new Vector2(0, 0), Color.Green);
 
