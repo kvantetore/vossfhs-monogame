@@ -28,6 +28,8 @@ namespace Astroids
         Vector2 rocketVelocity;
 
 
+        float currentFps = 0;
+
 
         float maxSpeed;
 
@@ -36,6 +38,7 @@ namespace Astroids
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
 
+            TargetElapsedTime = TimeSpan.FromSeconds(1f / 1000f);
             bullets = new List<Bullet>();
         }
 
@@ -90,6 +93,8 @@ namespace Astroids
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
+            currentFps = 1f / (float)gameTime.ElapsedGameTime.TotalSeconds;
+
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
@@ -185,7 +190,7 @@ namespace Astroids
                 bullet.Draw(spriteBatch);
             }
 
-            spriteBatch.DrawString(arial, $"Max Speed: {maxSpeed}", new Vector2(0, 0), Color.Green);
+            spriteBatch.DrawString(arial, $"Fps: {currentFps:0}", new Vector2(0, 0), Color.Green);
 
             spriteBatch.End();
 
