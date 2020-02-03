@@ -20,6 +20,7 @@ namespace Astroids
         SpriteFont arial;
 
         List<Bullet> bullets;
+        List<Rock> rocks;
 
         float rocketAngularVelocity;
         float rocketAngle;
@@ -27,7 +28,7 @@ namespace Astroids
         Vector2 rocketPosition;
         Vector2 rocketVelocity;
 
-
+        DateTime lastBullet = DateTime.MinValue;
         float currentFps = 0;
 
 
@@ -38,8 +39,9 @@ namespace Astroids
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
 
-            TargetElapsedTime = TimeSpan.FromSeconds(1f / 1000f);
+            TargetElapsedTime = TimeSpan.FromSeconds(1f / 60f);
             bullets = new List<Bullet>();
+            rocks = new List<Rock>();
         }
 
         /// <summary>
@@ -58,6 +60,12 @@ namespace Astroids
             var posX = graphics.PreferredBackBufferWidth / 2;
             var posY = graphics.PreferredBackBufferHeight / 2;
             rocketPosition = new Vector2(posX, posY);
+
+            var rock = new Rock(this);
+            rock.Load(Content);
+            rock.Position = new Vector2(900, 300);
+            rock.Scale = 200;
+            rocks.Add(rock);
 
             base.Initialize();
         }
@@ -132,7 +140,7 @@ namespace Astroids
                 rocketVelocity -= forward * 100f * timeStep;
             }
 
-            if (keyboard.IsKeyDown(Keys.Space))
+            if (keyboard.IsKeyDown(Keys.Space) && lastBullet < DateTime.Now - TimeSpan.FromSeconds(0.5))
             {
                 Bullet currentBullet = new Bullet(this);
                 currentBullet.Load(Content);
@@ -140,6 +148,8 @@ namespace Astroids
                 currentBullet.Angle = rocketAngle;
                 currentBullet.Velocity = forward * 200f;
                 currentBullet.Position = rocketPosition + forward * rocket.Width / 2;
+
+                lastBullet = DateTime.Now;
 
                 bullets.Add(currentBullet);
             }
@@ -158,12 +168,46 @@ namespace Astroids
                 bullet.Update(gameTime);
             }
 
+            foreach (var rock in rocks.ToArray())
+            {
+                rock.Update(gameTime);
+            }
+
+            foreach (var rock in rocks.ToArray())
+            {
+                foreach (var bullet in bullets.ToArray())
+                {
+                    if (IsCollision(bullet, rock))
+                    {
+                        RemoveBullet(bullet);
+                        RemoveRock(rock);
+                    }
+                }
+            }
+
             base.Update(gameTime);
         }
+
+        public bool IsCollision(Bullet b, Rock r)
+        {
+            var distance = (b.Position - r.Position).Length();
+            if (distance < r.Scale)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
 
         public void RemoveBullet(Bullet b)
         {
             bullets.Remove(b);
+        }
+
+        public void RemoveRock(Rock r)
+        {
+            rocks.Remove(r);
         }
 
         /// <summary>
@@ -188,6 +232,11 @@ namespace Astroids
             foreach (var bullet in bullets)
             {
                 bullet.Draw(spriteBatch);
+            }
+
+            foreach (var rock in rocks)
+            {
+                rock.Draw(spriteBatch);
             }
 
             spriteBatch.DrawString(arial, $"Fps: {currentFps:0}", new Vector2(0, 0), Color.Green);

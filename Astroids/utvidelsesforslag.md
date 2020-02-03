@@ -20,14 +20,29 @@ Vegger
 -----------
   - tegne en rakett til 
   - styre med rakett2 med wsad i stedet for piler
+  - kollisjon mellom spiller og kuler -> 2player versus
 
 Astroide
 --------
   - tegne en astroide 
-  - sjekke kollisjon
+  - sjekke kollisjon bullet
+  - sjekke kollisjon med spiller
+  - Splitte astroide
+  - Poeng ved treff
+  - Fart / Retning / 
+  - Wrap 
+  - Random spawn
 
 Skyte
 ------
   - tegne kule
   - sjekke kollisjon med astroide
   - Dele astroiden i to mindre astroider
+
+
+Spiller
+--------
+  - kollisjon med astroide,
+  - antall liv
+  - game over 
+  - forskjellig sprite ved aksellerasjon
